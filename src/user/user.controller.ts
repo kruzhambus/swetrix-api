@@ -55,7 +55,12 @@ export class UserController {
   @Roles(UserType.ADMIN)
   async get(@Query('take') take: number | undefined, @Query('skip') skip: number | undefined): Promise<Pagination<User> | User[]> {
     this.logger.log({ take, skip }, 'GET /user')
-    return await this.userService.paginate({ take, skip })
+    const users = await this.userService.paginate({ take, skip })
+    const usersResults: any = users.results.map((e) => {
+      return this.authService.processUser(e)
+    })
+    users.results = usersResults
+    return users
   }
 
   @Get('/search')
